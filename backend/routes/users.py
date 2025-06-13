@@ -22,7 +22,6 @@ async def get_current_user_info(current_user: dict = Depends(get_current_active_
 async def get_all_users(
     skip: int = 0, 
     limit: int = 100,
-    current_user: dict = Depends(get_current_active_user)
 ):
     """Get all users (protected route)"""
     users = []
