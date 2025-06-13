@@ -1,9 +1,9 @@
 # routes/users.py
 from fastapi import APIRouter, Depends, HTTPException, status
 from typing import List
+from auth import get_current_active_user
 from models import UserResponse, APIResponse
 from database import users_collection
-from auth import get_current_active_user
 from bson import ObjectId
 
 router = APIRouter(prefix="/users", tags=["Users"])

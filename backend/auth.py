@@ -1,5 +1,5 @@
 # auth.py
-from fastapi import HTTPException, Depends, status
+from fastapi import HTTPException, Depends, Request, status
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from passlib.context import CryptContext
 from jose import JWTError, jwt
@@ -14,6 +14,8 @@ pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
 # Security
 security = HTTPBearer()
+SECRET_KEY = settings.secret_key
+ALGORITHM = "HS256"
 
 def verify_password(plain_password: str, hashed_password: str) -> bool:
     """Verify password against hash"""
@@ -77,8 +79,34 @@ async def get_current_user(credentials: HTTPAuthorizationCredentials = Depends(s
         raise credentials_exception
     return user
 
-async def get_current_active_user(current_user: dict = Depends(get_current_user)):
-    """Get current active user"""
-    if not current_user.get("is_active", True):
-        raise HTTPException(status_code=400, detail="Inactive user")
-    return current_user
+async def get_token_from_request(request: Request, credentials: HTTPAuthorizationCredentials = Depends(security)) -> str:
+    if credentials and credentials.scheme.lower() == "bearer":
+        return credentials.credentials
+    
+    token = request.cookies.get("access_token")
+    print(f"Token from cookie: {token}")
+    if token:
+        return token
+    
+    # ถ้าไม่เจอ token ที่ไหนเลย
+    raise HTTPException(
+        status_code=status.HTTP_401_UNAUTHORIZED,
+        detail="Not authenticated",
+        headers={"WWW-Authenticate": "Bearer"},
+    )
+
+async def get_current_active_user(token: str = Depends(get_token_from_request)):
+    try:
+        payload = jwt.decode(token, settings.secret_key, algorithms=[settings.algorithm])
+        username: str = payload.get("sub")
+        if username is None:
+            raise HTTPException(status_code=401, detail="Invalid token: no subject")
+        # ดึง user จากฐานข้อมูลหรือที่เก็บ user ของคุณ
+        user = await get_user_by_username(username)
+        if user is None:
+            raise HTTPException(status_code=401, detail="User not found")
+        if not user["is_active"]:
+            raise HTTPException(status_code=403, detail="Inactive user")
+        return user
+    except JWTError:
+        raise HTTPException(status_code=401, detail="Token decode error")
