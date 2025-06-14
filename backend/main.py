@@ -1,10 +1,17 @@
+import sys
+import os
+
+from services.langchain_module import MongoChatMessageHistory
+from mongo.model.conversation import Conversation
+sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+
 from fastapi import FastAPI, HTTPException, Depends
 from fastapi.middleware.cors import CORSMiddleware
 from contextlib import asynccontextmanager
 import uvicorn
 
 from config import settings
-from database import connect_to_mongo, close_mongo_connection, database
+from mongo.database import connect_to_mongo, close_mongo_connection, database, conversation_collection
 from routes import api_router
 from auth import get_current_active_user
 
@@ -59,11 +66,18 @@ async def protected_route(current_user: dict = Depends(get_current_active_user))
         "user_id": str(current_user["_id"]),
         "access_level": "authenticated"
     }
+@app.post("/chat")
+async def chat_stream(conversation : Conversation):
+    print(conversation)
+    MongoChatMessageHistory(conversation.concversation_id, conversation_collection).add_message(conversation.messages)
 
-if __name__ == "__main__":
-    uvicorn.run(
-        "main:app",
-        host=settings.host,
-        port=settings.port,
-        reload=settings.environment == "development"
-    )
+    # return StreamingResponse(stream(messages , tools_choice), media_type="text/event-stream")
+    return None
+
+# if __name__ == "__main__":
+#     uvicorn.run(
+#         "main:app",
+#         host=settings.host,
+#         port=settings.port,
+#         reload=settings.environment == "development"
+#     )

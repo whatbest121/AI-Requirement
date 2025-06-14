@@ -1,7 +1,7 @@
 from datetime import datetime, timedelta
 from fastapi import HTTPException, status
-from models import UserCreate, UserLogin, UserResponse, Token
-from database import users_collection
+from mongo.model.modelUser import UserCreate, UserLogin, UserResponse, Token
+from mongo.database import users_collection
 from auth import (
     get_password_hash,
     authenticate_user,

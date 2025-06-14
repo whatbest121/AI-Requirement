@@ -5,6 +5,7 @@ client = AsyncIOMotorClient(settings.mongodb_url)
 database = client[settings.database_name]
 
 users_collection = database.users
+conversation_collection = database.conversations
 
 async def connect_to_mongo():
     """Create database connection"""
