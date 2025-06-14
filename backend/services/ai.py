@@ -6,6 +6,8 @@ from services.langchain_module import MongoChatMessageHistory
 from mongo.model.conversation import Message
 from langchain_openai import ChatOpenAI
 from langchain_core.messages import HumanMessage, AIMessage, AnyMessage , SystemMessage
+from datetime import datetime
+from mongo.database import conversation_collection
 load_dotenv()
 api_key = os.environ.get("OPENAI_API_KEY")
 async def OpenAI(messages: list[Message]) -> AIMessage:
@@ -45,14 +47,14 @@ async def OpenAI(messages: list[Message]) -> AIMessage:
     
     return reformat
 
-async def OpenAIStream(messages: list[Message]) -> AsyncGenerator[str, None]:
-    def message_to_dict(msg: Message):
-        d = msg.model_dump()
-        d["timestamp"] = msg.timestamp.isoformat()
-        return d
-    serialized_messages = [message_to_dict(m) for m in messages]
+async def OpenAIStream(messages: list[Message], concversation_id ) -> AsyncGenerator[str, None]:
+    # def message_to_dict(msg: Message):
+    #     d = msg
+    #     d["timestamp"] = msg.timestamp.isoformat()
+    #     return d
+    # serialized_messages = [message_to_dict(m) for m in messages]
     chat = []
-    for lang in serialized_messages:
+    for lang in messages:
         role = lang["role"]
         if role == "user":
             chat.append(HumanMessage(content=lang["content"]))
@@ -60,6 +62,9 @@ async def OpenAIStream(messages: list[Message]) -> AsyncGenerator[str, None]:
             chat.append(AIMessage(content=lang["content"]))
         elif role == "system":
             chat.append(SystemMessage(content=lang["content"]))
+        else: 
+            print("--raw--", lang)
+    print("----",chat)
     llm = ChatOpenAI(
         model="gpt-4.1-mini",
         api_key=api_key,
@@ -68,11 +73,15 @@ async def OpenAIStream(messages: list[Message]) -> AsyncGenerator[str, None]:
     )
     newMessage = ""
     async for chunk in llm.astream(chat):
-        print("Chunk received:", chunk)
         newMessage += chunk.content
+        
         if chunk.response_metadata.get("finish_reason", False):
-            print("Stream stopped", newMessage)
-            # MongoChatMessageHistory(conversation.concversation_id, conversation_collection).add_messages_conversation([content])
+            data = {
+            "role": "assistant",
+            "content": newMessage,
+            "timestamp": chunk.timestamp.isoformat() if hasattr(chunk, 'timestamp') else datetime.now().isoformat()
+        }
+            MongoChatMessageHistory(concversation_id, conversation_collection).add_messages_conversation([data])
         
         yield chunk.content
 

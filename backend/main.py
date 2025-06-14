@@ -79,7 +79,15 @@ async def chat_stream(conversation : Conversation):
 
 @app.post("/chatStream")
 async def chat_stream(conversation: Conversation):
-    return StreamingResponse(OpenAIStream(conversation.messages), media_type="text/event-stream")
+    result = await conversation_collection.find_one({"concversation_id": conversation.concversation_id})
+    newMessages = []
+    if result:
+        newMessages = result.get("messages", [])
+        newMessages += [conversation.messages[-1].model_dump()]
+    else:
+        newMessages = [conversation.messages[-1].model_dump()]
+    MongoChatMessageHistory(conversation.concversation_id, conversation_collection).add_messages_conversation(conversation.messages)
+    return StreamingResponse(OpenAIStream(newMessages, conversation.concversation_id), media_type="text/event-stream")
 
 
 # if __name__ == "__main__":
