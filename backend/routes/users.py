@@ -1,4 +1,3 @@
-# routes/users.py
 from fastapi import APIRouter, Depends, HTTPException, status
 from typing import List
 from auth import get_current_active_user

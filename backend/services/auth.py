@@ -1,5 +1,3 @@
-# services/auth_service.py
-
 from datetime import datetime, timedelta
 from fastapi import HTTPException, status
 from models import UserCreate, UserLogin, UserResponse, Token

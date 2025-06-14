@@ -9,10 +9,7 @@ from models import TokenData
 from database import users_collection
 from config import settings
 
-# Password hashing
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
-
-# Security
 security = HTTPBearer()
 SECRET_KEY = settings.secret_key
 ALGORITHM = "HS256"

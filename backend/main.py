@@ -1,10 +1,8 @@
-# main.py
 from fastapi import FastAPI, HTTPException, Depends
 from fastapi.middleware.cors import CORSMiddleware
 from contextlib import asynccontextmanager
 import uvicorn
 
-# Import our modules
 from config import settings
 from database import connect_to_mongo, close_mongo_connection, database
 from routes import api_router

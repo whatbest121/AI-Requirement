@@ -1,4 +1,3 @@
-# routes/auth.py
 from fastapi import APIRouter, Response
 from models import UserCreate, UserLogin, UserResponse
 from services.auth import register_user_service, login_user_service
@@ -14,7 +13,6 @@ async def register_user(user: UserCreate):
 async def login(user_credentials: UserLogin, response: Response):
     access_token, user = await login_user_service(user_credentials)
 
-    # ✅ Set JWT in cookie
     response.set_cookie(
         key="access_token",
         value=access_token,
