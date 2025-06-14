@@ -19,9 +19,13 @@ class MongoChatMessageHistory(BaseChatMessageHistory):
 
     def add_messages(self, messages: list[list[Message]] ) -> None:
         # print(messages[0][0])
+        for message in messages[-1]:
+            content = message.content
+            
+        print(f"Adding message to conversation {self.concversation_id}: {content}")
         self.collection.update_one(
             {"concversation_id": self.concversation_id},
-            {"$push": {"messages": {"$each": messages[0]}}},
+            {"$push": {"messages": {"$each": json.loads(messages[-1])}}},
             upsert=True
         )
         print(f"Adding messages to conversation {self.concversation_id}: {messages}")
