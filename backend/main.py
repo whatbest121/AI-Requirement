@@ -1,6 +1,9 @@
 import sys
 import os
 
+from fastapi.responses import StreamingResponse
+
+from services.ai import OpenAI, OpenAIStream
 from services.langchain_module import MongoChatMessageHistory
 from mongo.model.conversation import Conversation
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
@@ -68,11 +71,16 @@ async def protected_route(current_user: dict = Depends(get_current_active_user))
     }
 @app.post("/chat")
 async def chat_stream(conversation : Conversation):
-    print(conversation)
-    MongoChatMessageHistory(conversation.concversation_id, conversation_collection).add_message(conversation.messages)
+    MongoChatMessageHistory(conversation.concversation_id, conversation_collection).add_messages_conversation(conversation.messages)
+    content = await OpenAI(conversation.messages)
+    MongoChatMessageHistory(conversation.concversation_id, conversation_collection).add_messages_conversation([content])
+    return  content.get("content", None)
 
-    # return StreamingResponse(stream(messages , tools_choice), media_type="text/event-stream")
-    return None
+
+@app.post("/chatStream")
+async def chat_stream(conversation: Conversation):
+    return StreamingResponse(OpenAIStream(conversation.messages), media_type="text/event-stream")
+
 
 # if __name__ == "__main__":
 #     uvicorn.run(

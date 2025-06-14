@@ -3,8 +3,8 @@ from datetime import datetime
 from typing import List
 
 class Message(BaseModel):
-    role: str  # 'user' or 'ai'
-    content: str
+    role: str = Field(default="user")  # 'user' or 'ai'
+    content: str = Field(default="hi")
     timestamp: datetime = Field(default_factory=datetime.utcnow)
 
 class Conversation(BaseModel):

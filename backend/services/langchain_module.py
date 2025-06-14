@@ -1,3 +1,4 @@
+from typing import List
 from langchain_core.chat_history import BaseChatMessageHistory
 from langchain_core.messages import BaseMessage
 from pymongo.collection import Collection
@@ -10,26 +11,23 @@ class MongoChatMessageHistory(BaseChatMessageHistory):
         self.concversation_id = concversation_id
         self.collection = collection
 
-    # @property
-    # def messages(self) -> list[BaseMessage]:
-    #     doc = self.collection.find_one({"concversation_id": self.concversation_id})
-    #     if not doc:
-    #         return []
-    #     return [BaseMessage.parse_raw(m) for m in doc["messages"]]
+    def add_messages_conversation(self, messages: List[Message]) -> None:
 
-    def add_messages(self, messages: list[list[Message]] ) -> None:
-        # print(messages[0][0])
-        for message in messages[-1]:
-            content = message.content
-            
-        print(f"Adding message to conversation {self.concversation_id}: {content}")
+        def message_to_dict(msg: Message):
+            d = msg.model_dump()
+            if "timestamp" in d:
+                d["timestamp"] = msg.timestamp.isoformat() 
+            return d
+        if isinstance(messages[0], Message):
+
+            serialized_messages = [message_to_dict(m) for m in messages]
+        else:
+            serialized_messages = messages
         self.collection.update_one(
-            {"concversation_id": self.concversation_id},
-            {"$push": {"messages": {"$each": json.loads(messages[-1])}}},
-            upsert=True
-        )
-        print(f"Adding messages to conversation {self.concversation_id}: {messages}")
-
+        {"concversation_id": self.concversation_id},
+        {"$push": {"messages": {"$each": serialized_messages }}},
+        upsert=True
+    )
     def clear(self) -> None:
         self.collection.update_one(
             {"concversation_id": self.concversation_id},

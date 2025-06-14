@@ -12,6 +12,7 @@ class Settings(BaseSettings):
     host: str = "0.0.0.0"
     port: int = 8000
     environment: str = "development"
+    openai_api_key: str 
     
     class Config:
         env_file = ".env"
