@@ -64,7 +64,6 @@ async def OpenAIStream(messages: list[Message], concversation_id ) -> AsyncGener
             chat.append(SystemMessage(content=lang["content"]))
         else: 
             print("--raw--", lang)
-    print("----",chat)
     llm = ChatOpenAI(
         model="gpt-4.1-mini",
         api_key=api_key,
