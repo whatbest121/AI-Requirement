@@ -34,6 +34,7 @@ def extracBus(document:str):
     llm = ChatOpenAI(
         model="gpt-4.1-mini",
         api_key=api_key,
+        base_url=base_url,
         temperature=0,
     ).with_structured_output(ExtractedInfo, include_raw=True)
 

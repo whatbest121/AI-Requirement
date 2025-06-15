@@ -47,12 +47,7 @@ async def OpenAI(messages: list[Message]) -> AIMessage:
     
     return reformat
 
-async def OpenAIStream(messages: list[Message], concversation_id ) -> AsyncGenerator[str, None]:
-    # def message_to_dict(msg: Message):
-    #     d = msg
-    #     d["timestamp"] = msg.timestamp.isoformat()
-    #     return d
-    # serialized_messages = [message_to_dict(m) for m in messages]
+async def OpenAIStream(messages: list[Message], conversation_id ) -> AsyncGenerator[str, None]:
     chat = []
     for lang in messages:
         role = lang["role"]

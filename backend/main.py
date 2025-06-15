@@ -2,8 +2,10 @@ import asyncio
 import sys
 import os
 from typing import Optional
+from uuid import uuid4
 
 from fastapi.responses import StreamingResponse
+from pydantic import Field
 from pypdf import PdfReader
 from langchain_core.messages import HumanMessage, AIMessage, AnyMessage , SystemMessage
 from services.extrace import extracBus
@@ -86,7 +88,6 @@ async def chat_stream(conversation: Conversation):
     conv_id = conversation.conversation_id
     user_msg = conversation.messages[-1].content
 
-    # ✅ เช็คหรือสร้าง extracted_info ว่างเปล่า
     result = await conversation_collection.find_one({"conversation_id": conv_id})
     if not result:
         await conversation_collection.insert_one({
@@ -100,8 +101,6 @@ async def chat_stream(conversation: Conversation):
             }
         })
         result = await conversation_collection.find_one({"conversation_id": conv_id})
-
-    # ✅ พยายาม map user message -> field ใด field หนึ่ง
     await update_extracted_info_if_applicable(conv_id, user_msg)
 
     result = await conversation_collection.find_one({"conversation_id": conv_id})
@@ -132,11 +131,11 @@ async def chat_stream(conversation: Conversation):
     }]
 
     MongoChatMessageHistory(conv_id, conversation_collection).add_messages_conversation(conversation.messages)
-
     return StreamingResponse(OpenAIStream(messages, conv_id), media_type="text/event-stream")
 
 @app.post("/upload-pdf/")
-async def upload_pdf(file: UploadFile = File(...), user_id: str = Form(...), conversation_id: Optional[str] = Form(None)):
+async def upload_pdf(file: UploadFile = File(...), user_id: str = Form(...), conversation_id: Optional[str] = Form(default_factory=lambda: str(uuid4()))
+):
     contents = await file.read()
     try:
         from io import BytesIO
