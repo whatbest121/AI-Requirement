@@ -11,7 +11,7 @@ from langchain_core.messages import HumanMessage, AIMessage, AnyMessage , System
 from services.extrace import extracBus, update_extracted_info_if_applicable
 from services.ai import OpenAI, OpenAIStream
 from services.langchain_module import MongoChatMessageHistory
-from mongo.model.conversation import Conversation
+from mongo.model.conversation import Conversation, ConversationInput
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from fastapi import FastAPI, File, Form, HTTPException, Depends, UploadFile
@@ -75,16 +75,15 @@ async def protected_route(current_user: dict = Depends(get_current_active_user))
         "user_id": str(current_user["_id"]),
         "access_level": "authenticated"
     }
-@app.post("/chat")
-async def chat_stream(conversation : Conversation):
-    MongoChatMessageHistory(conversation.conversation_id, conversation_collection).add_messages_conversation(conversation.messages)
-    content = await OpenAI(conversation.messages)
-    MongoChatMessageHistory(conversation.conversation_id, conversation_collection).add_messages_conversation([content])
-    return  content.get("content", None)
-
 
 @app.post("/chatStream")
-async def chat_stream(conversation: Conversation):
+async def chat_stream(conversation_input: ConversationInput, current_user: dict = Depends(get_current_active_user)):
+    conversation = Conversation(
+        user_id=str(current_user["_id"]),
+        conversation_id=conversation_input.conversation_id,
+        messages=conversation_input.messages
+    )
+
     conv_id = conversation.conversation_id
     user_msg = conversation.messages[-1].content
 
@@ -92,6 +91,7 @@ async def chat_stream(conversation: Conversation):
     if not result:
         await conversation_collection.insert_one({
             "conversation_id": conv_id,
+            "user_id": conversation.user_id,
             "messages": [],
             "extracted_info": {
                 "COMPANY_PROFILE": None,
@@ -101,6 +101,7 @@ async def chat_stream(conversation: Conversation):
             }
         })
         result = await conversation_collection.find_one({"conversation_id": conv_id})
+
     await update_extracted_info_if_applicable(conv_id, user_msg)
 
     result = await conversation_collection.find_one({"conversation_id": conv_id})
@@ -115,13 +116,14 @@ async def chat_stream(conversation: Conversation):
         missing_info.append("งบประมาณ")
     if not extracted_info.get("PURPOSE_OF_PROJECTS"):
         missing_info.append("วัตถุประสงค์ของโครงการ")
-    print("ข้อมูลที่ขาด", missing_info)
+
     system_message = "คุณคือผู้ช่วย AI ที่จะช่วยวิเคราะห์และให้คำแนะนำเกี่ยวกับโครงการ"
     if missing_info:
         system_message += f"\n\nข้อมูลที่ยังขาด: {', '.join(missing_info)}"
         system_message += "\nกรุณาให้ข้อมูลเพิ่มเติมในส่วนที่ขาดหายไป"
     else:
         system_message = "ข้อมูลทั้งหมดครบถ้วนแล้ว สิ้นสุดการเก็บ Requirment"
+
     messages = result.get("messages", [])
     messages += [conversation.messages[-1].model_dump()]
     messages += [{
@@ -134,9 +136,14 @@ async def chat_stream(conversation: Conversation):
     return StreamingResponse(OpenAIStream(messages, conv_id), media_type="text/event-stream")
 
 @app.post("/upload-pdf/")
-async def upload_pdf(file: UploadFile = File(...), user_id: str = Form(...), conversation_id: Optional[str] = Form(default_factory=lambda: str(uuid4()))
+async def upload_pdf(
+    file: UploadFile = File(...),
+    conversation_id: Optional[str] = Form(default_factory=lambda: str(uuid4())),
+    current_user: dict = Depends(get_current_active_user)
 ):
+    user_id = str(current_user["_id"])
     contents = await file.read()
+    
     try:
         from io import BytesIO
         pdf_reader = PdfReader(BytesIO(contents))
@@ -147,14 +154,19 @@ async def upload_pdf(file: UploadFile = File(...), user_id: str = Form(...), con
         return {"error": str(e)}
 
     extracted_info = extracBus(text)
-    
+
     if conversation_id:
         await conversation_collection.update_one(
             {"conversation_id": conversation_id},
-            {"$set": {"extracted_info": extracted_info}},
+            {
+                "$set": {
+                    "user_id": user_id,
+                    "extracted_info": extracted_info
+                }
+            },
             upsert=True
         )
-    
+
     return {
         "filename": file.filename,
         "user_id": user_id,
