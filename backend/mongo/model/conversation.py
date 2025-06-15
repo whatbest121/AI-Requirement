@@ -10,7 +10,7 @@ class Message(BaseModel):
 
 class Conversation(BaseModel):
     user_id: str
-    concversation_id: Optional[str] = Field(default_factory=lambda: str(uuid4()))
+    conversation_id: Optional[str] = Field(default_factory=lambda: str(uuid4()))
     messages: List[Message]
 
 class ExtractedInfo(BaseModel):

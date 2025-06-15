@@ -10,6 +10,7 @@ from datetime import datetime
 from mongo.database import conversation_collection
 load_dotenv()
 api_key = os.environ.get("OPENAI_API_KEY")
+base_url = os.environ.get("OPENAI_BASE_URL")
 async def OpenAI(messages: list[Message]) -> AIMessage:
   
     # print("Loading OpenAI API key...",os.environ.get("OPENAI_API_KEY")), 
@@ -62,6 +63,7 @@ async def OpenAIStream(messages: list[Message], conversation_id ) -> AsyncGenera
     llm = ChatOpenAI(
         model="gpt-4.1-mini",
         api_key=api_key,
+        base_url=base_url,
         temperature=0,
         stream_usage=True,
     )
@@ -75,7 +77,7 @@ async def OpenAIStream(messages: list[Message], conversation_id ) -> AsyncGenera
             "content": newMessage,
             "timestamp": chunk.timestamp.isoformat() if hasattr(chunk, 'timestamp') else datetime.now().isoformat()
         }
-            MongoChatMessageHistory(concversation_id, conversation_collection).add_messages_conversation([data])
+            MongoChatMessageHistory(conversation_id, conversation_collection).add_messages_conversation([data])
         
         yield chunk.content
 

@@ -7,8 +7,8 @@ from bson import ObjectId
 import json
 
 class MongoChatMessageHistory(BaseChatMessageHistory):
-    def __init__(self, concversation_id: str, collection: Collection):
-        self.concversation_id = concversation_id
+    def __init__(self, conversation_id: str, collection: Collection):
+        self.conversation_id = conversation_id
         self.collection = collection
 
     def add_messages_conversation(self, messages: List[Message]) -> None:
@@ -24,13 +24,13 @@ class MongoChatMessageHistory(BaseChatMessageHistory):
         else:
             serialized_messages = messages
         self.collection.update_one(
-        {"concversation_id": self.concversation_id},
+        {"conversation_id": self.conversation_id},
         {"$push": {"messages": {"$each": serialized_messages }}},
         upsert=True
     )
     def clear(self) -> None:
         self.collection.update_one(
-            {"concversation_id": self.concversation_id},
+            {"conversation_id": self.conversation_id},
             {"$set": {"messages": []}},
             upsert=True
         )

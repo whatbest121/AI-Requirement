@@ -8,7 +8,7 @@ from fastapi.responses import StreamingResponse
 from pydantic import Field
 from pypdf import PdfReader
 from langchain_core.messages import HumanMessage, AIMessage, AnyMessage , SystemMessage
-from services.extrace import extracBus
+from services.extrace import extracBus, update_extracted_info_if_applicable
 from services.ai import OpenAI, OpenAIStream
 from services.langchain_module import MongoChatMessageHistory
 from mongo.model.conversation import Conversation
@@ -77,9 +77,9 @@ async def protected_route(current_user: dict = Depends(get_current_active_user))
     }
 @app.post("/chat")
 async def chat_stream(conversation : Conversation):
-    MongoChatMessageHistory(conversation.concversation_id, conversation_collection).add_messages_conversation(conversation.messages)
+    MongoChatMessageHistory(conversation.conversation_id, conversation_collection).add_messages_conversation(conversation.messages)
     content = await OpenAI(conversation.messages)
-    MongoChatMessageHistory(conversation.concversation_id, conversation_collection).add_messages_conversation([content])
+    MongoChatMessageHistory(conversation.conversation_id, conversation_collection).add_messages_conversation([content])
     return  content.get("content", None)
 
 
@@ -159,7 +159,8 @@ async def upload_pdf(file: UploadFile = File(...), user_id: str = Form(...), con
         "filename": file.filename,
         "user_id": user_id,
         "conversation_id": conversation_id,
-        "extracted_text": text 
+        "extracted_text": text,
+        "extracted_info": extracted_info
     }
 
 #fff
