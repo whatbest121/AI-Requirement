@@ -11,42 +11,6 @@ from mongo.database import conversation_collection
 load_dotenv()
 api_key = os.environ.get("OPENAI_API_KEY")
 base_url = os.environ.get("OPENAI_BASE_URL")
-async def OpenAI(messages: list[Message]) -> AIMessage:
-  
-    # print("Loading OpenAI API key...",os.environ.get("OPENAI_API_KEY")), 
-    # if not os.environ.get("OPENAI_API_KEY"):
-    #     os.environ["OPENAI_API_KEY"] = getpass.getpass("Enter your OpenAI API key: ")
-    print("API Key loaded successfully.")
-    def message_to_dict(msg: Message):
-            d = msg.model_dump()
-            d["timestamp"] = msg.timestamp.isoformat() 
-            return d
-
-    serialized_messages = [message_to_dict(m) for m in messages]
-    chat = []
-    for lang in serialized_messages:
-        role = lang["role"]
-        if role == "user":
-            chat.append(HumanMessage(content=lang["content"]))
-        elif role == "assistant":
-            chat.append(AIMessage(content=lang["content"]))
-        elif role == "system":
-            chat.append(SystemMessage(content=lang["content"]))
-
-    llm = ChatOpenAI(
-    model="gpt-4.1-mini",
-    api_key=api_key,
-    temperature=0,
-    )
-    res = llm.invoke(chat)
-    
-    reformat = {
-        "role": res.type,
-        "content": res.content,
-        "timestamp": res.timestamp.isoformat() if hasattr(res, 'timestamp') else None
-    }
-    
-    return reformat
 
 async def OpenAIStream(messages: list[Message], conversation_id ) -> AsyncGenerator[str, None]:
     chat = []

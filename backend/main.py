@@ -1,15 +1,12 @@
-import asyncio
 import sys
 import os
 from typing import Optional
 from uuid import uuid4
 
 from fastapi.responses import StreamingResponse
-from pydantic import Field
 from pypdf import PdfReader
-from langchain_core.messages import HumanMessage, AIMessage, AnyMessage , SystemMessage
 from services.extrace import extracBus, update_extracted_info_if_applicable
-from services.ai import OpenAI, OpenAIStream
+from services.ai import OpenAIStream
 from services.langchain_module import MongoChatMessageHistory
 from mongo.model.conversation import Conversation, ConversationInput
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
