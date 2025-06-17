@@ -3,11 +3,11 @@ from uuid import uuid4
 from fastapi import APIRouter, Depends, File, Form, HTTPException, UploadFile, status
 from fastapi.responses import StreamingResponse
 from pypdf import PdfReader
-from backend.auth import get_current_active_user
-from backend.mongo.model.conversation import Conversation, ConversationInput
-from backend.services.ai import OpenAIStream
-from backend.services.extrace import extracBus, update_extracted_info_if_applicable
-from backend.services.langchain_module import MongoChatMessageHistory
+from auth import get_current_active_user
+from mongo.model.conversation import Conversation, ConversationInput
+from services.ai import OpenAIStream
+from services.extrace import extracBus, update_extracted_info_if_applicable
+from services.langchain_module import MongoChatMessageHistory
 from mongo.database import conversation_collection
 
 router = APIRouter(prefix="/ai", tags=["Ai"])

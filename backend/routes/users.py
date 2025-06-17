@@ -1,6 +1,6 @@
 from fastapi import APIRouter, Depends, HTTPException, status
 from typing import List
-from backend.auth import get_current_active_user
+from auth import get_current_active_user
 from mongo.model.modelUser import UserResponse, APIResponse
 from mongo.database import users_collection
 from bson import ObjectId
