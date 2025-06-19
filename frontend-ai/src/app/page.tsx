@@ -4,6 +4,7 @@ import { useAuth } from "@/authentication/hook";
 import { Button } from "@/components/ui/button";
 import { useAppStore } from "@/store/app";
 import { useChatStream } from "@/api/services/useChat";
+import ChatDashboard from "@/components/chat";
 export default function Home() {
   const { isAuthenticated } = useAuth()
   const router = useRouter()
@@ -19,10 +20,12 @@ export default function Home() {
   } = useAppStore()
 
   return (
-    <Button onClick={() => {
-      setChatMessage("hi")
-      mutate()
+    // <Button onClick={() => {
+    //   setChatMessage("hi")
+    //   mutate()
 
-    }}>xxxxxxx</Button>
+    // }}>xxxxxxx</Button>
+
+    <ChatDashboard/>
   );
 }
