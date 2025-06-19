@@ -1,3 +1,4 @@
+from datetime import datetime
 from typing import Optional
 from uuid import uuid4
 from fastapi import APIRouter, Depends, File, Form, HTTPException, UploadFile, status
@@ -18,7 +19,11 @@ async def chat_stream(conversation_input: ConversationInput, current_user: dict 
     conversation = Conversation(
         user_id=str(current_user["_id"]),
         conversation_id=conversation_input.conversation_id,
-        messages=conversation_input.messages
+        messages=[{
+            "role": "user",
+            "content": conversation_input.content,
+            "timestamp": datetime.now()
+        }]
     )
 
     conv_id = conversation.conversation_id

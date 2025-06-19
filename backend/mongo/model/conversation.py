@@ -11,7 +11,7 @@ class Message(BaseModel):
 
 class ConversationInput(BaseModel):
     conversation_id: Optional[str] = Field(default_factory=lambda: str(uuid4()))
-    messages: List[Message]
+    content: str
 
 class Conversation(BaseModel):
     user_id: str

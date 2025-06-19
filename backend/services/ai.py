@@ -1,4 +1,5 @@
 import getpass
+import json
 import os
 from typing import AsyncGenerator
 from dotenv import load_dotenv
@@ -43,6 +44,9 @@ async def OpenAIStream(messages: list[Message], conversation_id ) -> AsyncGenera
         }
             MongoChatMessageHistory(conversation_id, conversation_collection).add_messages_conversation([data])
         
-        yield chunk.content
+        yield json.dumps({
+            "content": chunk.content,
+            "conversation_id": conversation_id
+        }, ensure_ascii=False) + "\n"
 
 

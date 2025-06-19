@@ -1,46 +1,84 @@
 import { fetchWithAuth } from '@/lib/treaty'
-import { useMutation } from '@tanstack/react-query'
+import { safeJson } from '@/lib/utils'
 
 interface ConversationInput {
     conversation_id?: string
-    messages: {
-        role: string,
-        content: string,
-        timestamp: Date,
-    }[]
+    content: string
 }
 
-async function streamChat(conversation: ConversationInput) {
-    const res = await fetchWithAuth('/api/v1/ai/chatStream', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(conversation),
-    })
+interface StreamChatOptions {
+    conversationId?: string
+    setNewConversationId: (id: string) => void
+    setAiAnswering: (val: { isLoading: boolean; content: string }) => void
+    setChatMessage: (val: string) => void
+    chatMessage: string
+    resetAiAnswer: () => void
+    newConversationId: string
+}
 
+export async function streamChat({
+    resetAiAnswer,
+    setAiAnswering,
+    setChatMessage,
+    setNewConversationId,
+    conversationId,
+    chatMessage,
+    newConversationId: newConversationIds
+}: StreamChatOptions) {
+    console.log("🚀 ~ conversationId:", conversationId)
+    if (chatMessage === '') return
 
-    if (!res.body) throw new Error("No stream body returned")
-
-    const reader = res.body.getReader()
-    const decoder = new TextDecoder()
-
-    let fullMessage = ""
-
-    while (true) {
-        const { value, done } = await reader.read()
-        if (done) break
-
-        const chunk = decoder.decode(value, { stream: true })
-        fullMessage += chunk
-
-        // 🔁 แสดง chunk หรือ update UI (ผ่าน callback หรือ store)
-        console.log("chunk:", chunk)
+    const conversation: ConversationInput = {
+        content: chatMessage,
+        ...(conversationId ? { conversation_id: conversationId } : newConversationIds && { conversation_id: newConversationIds }),
     }
 
-    return fullMessage
-}
+    setAiAnswering({ isLoading: true, content: '' })
 
-const useChatStream = () => {
-    return useMutation({
-        mutationFn: streamChat,
-    })
+    try {
+        const res = await fetchWithAuth('/api/v1/ai/chatStream', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(conversation),
+        })
+
+        if (!res.body) throw new Error('No stream body returned')
+
+        const reader = res.body.getReader()
+        const decoder = new TextDecoder('utf-8')
+
+        let answer = ''
+        let newConversationId = ''
+        let buffer = ''
+
+        while (true) {
+            const { value, done } = await reader.read()
+            if (done) break
+
+            buffer += decoder.decode(value, { stream: true })
+
+            const lines = buffer.split('\n')
+            buffer = lines.pop() ?? ''
+            console.log(1)
+            for (const line of lines) {
+                const json = safeJson(line)
+                if (!json) continue
+                if (!newConversationId && !conversationId && json.conversation_id) {
+                    newConversationId = json.conversation_id
+                    console.log("🚀 ~ newConversationId:", newConversationId)
+                }
+                answer += json.content ?? ''
+                setAiAnswering({ isLoading: true, content: answer })
+            }
+        }
+
+        if (!conversationId && newConversationId) {
+            console.log(1)
+            setNewConversationId(newConversationId)
+        }
+    } catch (error) {
+        resetAiAnswer()
+        setChatMessage('')
+        console.error('❌ streamChat error:', error)
+    }
 }
