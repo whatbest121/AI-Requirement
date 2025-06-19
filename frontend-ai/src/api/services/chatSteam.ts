@@ -65,7 +65,6 @@ export async function streamChat({
                 if (!json) continue
                 if (!newConversationId && !conversationId && json.conversation_id) {
                     newConversationId = json.conversation_id
-                    console.log("🚀 ~ newConversationId:", newConversationId)
                 }
                 answer += json.content ?? ''
                 setAiAnswering({ isLoading: true, content: answer })
@@ -79,6 +78,5 @@ export async function streamChat({
     } catch (error) {
         resetAiAnswer()
         setChatMessage('')
-        console.error('❌ streamChat error:', error)
     }
 }
