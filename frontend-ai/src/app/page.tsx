@@ -17,7 +17,6 @@ export default function Home() {
     setAiAnswering,
     aiAnswering,
   } = useAppStore()
-    console.log("🚀 ~ Home ~ aiAnswering:", aiAnswering)
 
   return (
     <Button onClick={() => {
