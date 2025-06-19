@@ -23,8 +23,8 @@ import {
   X
 } from 'lucide-react';
 
-const ChatDashboard = () => {
-  const [messages, setMessages] = useState([
+const ChatDashboard = () => { 
+    const [messages, setMessages] = useState([
     {
       "role": "user",
       "content": "hi",
@@ -46,7 +46,7 @@ const ChatDashboard = () => {
       "timestamp": "2025-06-20T00:36:15.361826"
     }
   ]);
-  
+
   const [conversationHistory, setConversationHistory] = useState([
     {
       "conversation_id": "a1957567-0fc5-41eb-bfb8-640ed8c434b6",
@@ -101,10 +101,10 @@ const ChatDashboard = () => {
 
   const formatTime = (timestamp) => {
     const date = new Date(timestamp);
-    return date.toLocaleTimeString('th-TH', { 
-      hour: '2-digit', 
+    return date.toLocaleTimeString('th-TH', {
+      hour: '2-digit',
       minute: '2-digit',
-      hour12: false 
+      hour12: false
     });
   };
 
@@ -119,9 +119,9 @@ const ChatDashboard = () => {
     } else if (date.toDateString() === yesterday.toDateString()) {
       return 'เมื่อวาน';
     } else {
-      return date.toLocaleDateString('th-TH', { 
-        day: 'numeric', 
-        month: 'short' 
+      return date.toLocaleDateString('th-TH', {
+        day: 'numeric',
+        month: 'short'
       });
     }
   };
@@ -159,7 +159,7 @@ const ChatDashboard = () => {
     if (!newMessage.trim() && uploadedFiles.length === 0) return;
 
     let messageContent = newMessage;
-    
+
     // Add file attachments info to message
     if (uploadedFiles.length > 0) {
       const fileNames = uploadedFiles.map(f => f.name).join(', ');
@@ -181,11 +181,11 @@ const ChatDashboard = () => {
     // Simulate AI response
     setTimeout(() => {
       let responseContent = 'ขอบคุณสำหรับคำถามครับ! ฉันจะช่วยตอบคำถามของคุณให้ดีที่สุด';
-      
+
       if (userMessage.files && userMessage.files.length > 0) {
         responseContent += `\n\nฉันได้รับไฟล์ที่คุณส่งมาแล้ว (${userMessage.files.length} ไฟล์) กำลังประมวลผล...`;
       }
-      
+
       responseContent += '\n\nมีอะไรอื่นที่อยากทราบเพิ่มเติมไหมครับ?';
 
       const assistantMessage = {
@@ -230,7 +230,7 @@ const ChatDashboard = () => {
   return (
     <div className="flex w-full h-screen bg-gradient-to-br from-slate-50 to-blue-50">
       {/* Sidebar */}
-      <div className={`${sidebarOpen ? 'w-80' : 'w-0'} transition-all duration-300 overflow-hidden bg-white shadow-xl border-r border-gray-200`}>
+      <div className={`${sidebarOpen ? 'w-80' : 'w-0'} transition-all duration-300 overflow-hidden bg-white shadow-xl border-r border-gray-200 flex flex-col min-h-0`}>
         <div className="p-4 border-b border-gray-200">
           <div className="flex items-center justify-between mb-4">
             <h2 className="text-lg font-semibold text-gray-800 flex items-center gap-2">
@@ -255,18 +255,17 @@ const ChatDashboard = () => {
             บทสนทนาใหม่
           </Button>
         </div>
-        
-        <ScrollArea className="h-[calc(100vh-120px)]">
+
+        <ScrollArea className="h-[calc(100vh-120px)] flex-1 min-h-0">
           <div className="p-2">
             {conversationHistory.map((conversation) => (
               <div
                 key={conversation.conversation_id}
                 onClick={() => handleConversationSelect(conversation.conversation_id)}
-                className={`p-3 rounded-lg mb-2 cursor-pointer transition-all duration-200 ${
-                  currentConversationId === conversation.conversation_id
-                    ? 'bg-blue-100 border-blue-300 border'
-                    : 'hover:bg-gray-100'
-                }`}
+                className={`p-3 rounded-lg mb-2 cursor-pointer transition-all duration-200 ${currentConversationId === conversation.conversation_id
+                  ? 'bg-blue-100 border-blue-300 border'
+                  : 'hover:bg-gray-100'
+                  }`}
               >
                 <div className="flex items-start justify-between">
                   <div className="flex-1 min-w-0">
@@ -293,7 +292,7 @@ const ChatDashboard = () => {
       </div>
 
       {/* Main Chat Area */}
-      <div className="flex-1 flex flex-col">
+      <div className="flex-1 flex flex-col min-h-0">
         {/* Header */}
         <div className="bg-white shadow-sm border-b border-gray-200 p-4">
           <div className="flex items-center gap-3">
@@ -320,17 +319,16 @@ const ChatDashboard = () => {
         </div>
 
         {/* Chat Messages */}
-        <div className="flex-1 p-6 overflow-hidden">
-          <Card className="h-full shadow-xl border-0 bg-white/80 backdrop-blur-sm">
-            <CardContent className="p-0 h-full flex flex-col">
-              <ScrollArea className="flex-1 p-6">
+        <div className="flex-1 p-6 overflow-hidden min-h-0">
+          <Card className="h-full shadow-xl border-0 bg-white/80 backdrop-blur-sm flex flex-col min-h-0">
+            <CardContent className="p-0 h-full flex flex-col min-h-0">
+              <ScrollArea className="flex-1 min-h-0 p-6">
                 <div className="space-y-6">
                   {messages.map((message, index) => (
                     <div
                       key={index}
-                      className={`flex gap-3 ${
-                        message.role === 'user' ? 'justify-end' : 'justify-start'
-                      }`}
+                      className={`flex gap-3 ${message.role === 'user' ? 'justify-end' : 'justify-start'
+                        }`}
                     >
                       {message.role === 'assistant' && (
                         <Avatar className="w-8 h-8 border-2 border-blue-200">
@@ -339,38 +337,35 @@ const ChatDashboard = () => {
                           </AvatarFallback>
                         </Avatar>
                       )}
-                      
+
                       <div
-                        className={`max-w-[70%] rounded-2xl px-4 py-3 ${
-                          message.role === 'user'
-                            ? 'bg-gradient-to-r from-blue-600 to-blue-700 text-white shadow-lg'
-                            : 'bg-gray-100 text-gray-800 shadow-md border border-gray-200'
-                        }`}
+                        className={`max-w-[70%] rounded-2xl px-4 py-3 ${message.role === 'user'
+                          ? 'bg-gradient-to-r from-blue-600 to-blue-700 text-white shadow-lg'
+                          : 'bg-gray-100 text-gray-800 shadow-md border border-gray-200'
+                          }`}
                       >
                         <div className="whitespace-pre-wrap text-sm leading-relaxed">
                           {message.content}
                         </div>
-                        
+
                         {/* File attachments */}
                         {message.files && message.files.length > 0 && (
                           <div className="mt-3 space-y-2">
                             {message.files.map((file) => (
                               <div
                                 key={file.id}
-                                className={`flex items-center gap-2 p-2 rounded-lg ${
-                                  message.role === 'user' 
-                                    ? 'bg-blue-500/20' 
-                                    : 'bg-gray-200'
-                                }`}
+                                className={`flex items-center gap-2 p-2 rounded-lg ${message.role === 'user'
+                                  ? 'bg-blue-500/20'
+                                  : 'bg-gray-200'
+                                  }`}
                               >
                                 {getFileIcon(file.type)}
                                 <div className="flex-1 min-w-0">
                                   <div className="text-xs font-medium truncate">
                                     {file.name}
                                   </div>
-                                  <div className={`text-xs ${
-                                    message.role === 'user' ? 'text-blue-100' : 'text-gray-500'
-                                  }`}>
+                                  <div className={`text-xs ${message.role === 'user' ? 'text-blue-100' : 'text-gray-500'
+                                    }`}>
                                     {formatFileSize(file.size)}
                                   </div>
                                 </div>
@@ -378,16 +373,15 @@ const ChatDashboard = () => {
                             ))}
                           </div>
                         )}
-                        
+
                         <div
-                          className={`text-xs mt-2 ${
-                            message.role === 'user' ? 'text-blue-100' : 'text-gray-500'
-                          }`}
+                          className={`text-xs mt-2 ${message.role === 'user' ? 'text-blue-100' : 'text-gray-500'
+                            }`}
                         >
                           {formatTime(message.timestamp)}
                         </div>
                       </div>
-                      
+
                       {message.role === 'user' && (
                         <Avatar className="w-8 h-8 border-2 border-blue-200">
                           <AvatarFallback className="bg-blue-600 text-white">
@@ -397,7 +391,7 @@ const ChatDashboard = () => {
                       )}
                     </div>
                   ))}
-                  
+
                   {isTyping && (
                     <div className="flex gap-3 justify-start">
                       <Avatar className="w-8 h-8 border-2 border-blue-200">
@@ -408,8 +402,8 @@ const ChatDashboard = () => {
                       <div className="bg-gray-100 rounded-2xl px-4 py-3 shadow-md border border-gray-200">
                         <div className="flex gap-1">
                           <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce"></div>
-                          <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{animationDelay: '0.1s'}}></div>
-                          <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{animationDelay: '0.2s'}}></div>
+                          <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '0.1s' }}></div>
+                          <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '0.2s' }}></div>
                         </div>
                       </div>
                     </div>
@@ -417,7 +411,7 @@ const ChatDashboard = () => {
                   <div ref={messagesEndRef} />
                 </div>
               </ScrollArea>
-              
+
               {/* File Upload Area */}
               {uploadedFiles.length > 0 && (
                 <div className="border-t border-gray-200 p-4 bg-gray-50/50">
@@ -449,7 +443,7 @@ const ChatDashboard = () => {
                   </div>
                 </div>
               )}
-              
+
               {/* Input Area */}
               <div className="border-t border-gray-200 p-4 bg-gray-50/50">
                 <div className="flex gap-3 items-end">
