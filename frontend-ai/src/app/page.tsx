@@ -1,31 +1,14 @@
 'use client'
 import { useRouter } from "next/navigation"
 import { useAuth } from "@/authentication/hook";
-import { Button } from "@/components/ui/button";
-import { useAppStore } from "@/store/app";
-import { useChatStream } from "@/api/services/useChat";
-import ChatDashboard from "@/components/chat";
+import ChatDashboard from "@/components/chat/ChatDashboard";
 export default function Home() {
   const { isAuthenticated } = useAuth()
   const router = useRouter()
   if (!isAuthenticated) {
     router.push("/login")
   }
-  const { mutate } = useChatStream()
-  const {
-    chatMessage,
-    setChatMessage,
-    setAiAnswering,
-    aiAnswering,
-  } = useAppStore()
-
   return (
-    // <Button onClick={() => {
-    //   setChatMessage("hi")
-    //   mutate()
-
-    // }}>xxxxxxx</Button>
-
-    <ChatDashboard/>
+    <ChatDashboard />
   );
 }

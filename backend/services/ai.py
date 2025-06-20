@@ -3,12 +3,14 @@ import json
 import os
 from typing import AsyncGenerator
 from dotenv import load_dotenv
+from mongo.model.modelUser import HistoryConversation
 from services.langchain_module import MongoChatMessageHistory
-from mongo.model.conversation import Message
+from mongo.model.conversation import ConversationRespond, Message
 from langchain_openai import ChatOpenAI
 from langchain_core.messages import HumanMessage, AIMessage, AnyMessage , SystemMessage
 from datetime import datetime
 from mongo.database import conversation_collection
+from bson import json_util
 load_dotenv()
 api_key = os.environ.get("OPENAI_API_KEY")
 base_url = os.environ.get("OPENAI_BASE_URL")
@@ -48,5 +50,25 @@ async def OpenAIStream(messages: list[Message], conversation_id ) -> AsyncGenera
             "content": chunk.content,
             "conversation_id": conversation_id
         }, ensure_ascii=False) + "\n"
+
+async def historyConversation (user_id:str):
+    result = conversation_collection.find({"user_id":user_id }).sort("creatAt", -1)
+
+    data =[]
+    async for history in result:
+        data.append(ConversationRespond(
+            id=str(history["_id"]),
+            user_id=str(history["user_id"]),
+            conversation_id=history["conversation_id"],
+            messages=history.get("messages", []),
+        ))
+    
+    return data
+
+async def historyChat (input:HistoryConversation):
+    document = await conversation_collection.find_one({"user_id":input.user_id, "conversation_id":input.conversation_id })
+    return json.loads(json_util.dumps(document))
+
+
 
 

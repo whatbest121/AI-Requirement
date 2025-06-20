@@ -7,6 +7,7 @@ export async function fetchWithAuth(url: string, options: RequestInit = {}) {
 		headers.set('Authorization', `Bearer ${token}`)
 	}
 
+	console.log(Array.from(headers.entries()))
 	return fetch(url, {
 		...options,
 		headers,

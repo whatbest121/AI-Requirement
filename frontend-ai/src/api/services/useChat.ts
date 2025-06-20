@@ -1,10 +1,13 @@
 import { useAppStore } from '@/store/app'
 import { useConversationId } from '@/store/conversationID'
-import { useMutation } from '@tanstack/react-query'
+import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { streamChat } from './chatSteam'
 import { useCallback } from 'react'
+import { QKey } from './history'
 
 export const useChatStream = () => {
+    const queryClient = useQueryClient()
+
     const { conversationId, setNewConversationId, newConversationId } = useConversationId()
     const { chatMessage, setChatMessage, setAiAnswering } = useAppStore()
     const resetAiAnswer = useCallback(
@@ -27,5 +30,13 @@ export const useChatStream = () => {
                     setChatMessage,
                 }
             ),
+        onSuccess: () => {
+            console.log(11111111)
+            queryClient.invalidateQueries({ queryKey: [QKey] })
+        },
+
     })
 }
+
+
+

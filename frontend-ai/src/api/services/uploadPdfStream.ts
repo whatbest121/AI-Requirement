@@ -1,44 +1,36 @@
 import { fetchWithAuth } from '@/lib/treaty'
-import { safeJson } from '@/lib/utils'
 
-interface ConversationInput {
-    conversation_id?: string
+interface UploadPdfOptions {
+    file: File
     content: string
-}
-
-interface StreamChatOptions {
     conversationId?: string
     setNewConversationId: (id: string) => void
     setAiAnswering: (val: { isLoading: boolean; content: string }) => void
     setChatMessage: (val: string) => void
-    chatMessage: string
     resetAiAnswer: () => void
-    newConversationId: string
 }
 
-export async function streamChat({
-    resetAiAnswer,
+export async function uploadPdfStream({
+    file,
+    content,
+    conversationId,
+    setNewConversationId,
     setAiAnswering,
     setChatMessage,
-    setNewConversationId,
-    conversationId,
-    chatMessage,
-    newConversationId: newConversationIds
-}: StreamChatOptions) {
-    if (chatMessage === '') return
+    resetAiAnswer,
+}: UploadPdfOptions) {
+    if (!file) return
 
-    const conversation: ConversationInput = {
-        content: chatMessage,
-        ...(conversationId ? { conversation_id: conversationId } : newConversationIds && { conversation_id: newConversationIds }),
-    }
-
+    const formData = new FormData()
+    formData.append('file', file)
+    formData.append('content', content)
+    formData.append('conversation_id', conversationId || '')
     setAiAnswering({ isLoading: true, content: '' })
 
     try {
-        const res = await fetchWithAuth('/api/v1/ai/chatStream', {
+        const res = await fetchWithAuth('http://localhost:8000/api/v1/ai/upload-pdf/', {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(conversation),
+            body: formData,
         })
 
         if (!res.body) throw new Error('No stream body returned')
@@ -55,28 +47,26 @@ export async function streamChat({
             if (done) break
 
             buffer += decoder.decode(value, { stream: true })
-
             const lines = buffer.split('\n')
             buffer = lines.pop() ?? ''
-            console.log(1)
             for (const line of lines) {
-                const json = safeJson(line)
-                if (!json) continue
-                if (!newConversationId && !conversationId && json.conversation_id) {
-                    newConversationId = json.conversation_id
-                }
-                answer += json.content ?? ''
-                setAiAnswering({ isLoading: true, content: answer })
+                try {
+                    const json = JSON.parse(line)
+                    if (!newConversationId && !conversationId && json.conversation_id) {
+                        newConversationId = json.conversation_id
+                    }
+                    answer += json.content ?? ''
+                    setAiAnswering({ isLoading: true, content: answer })
+                } catch { }
             }
         }
         setAiAnswering({ isLoading: false, content: answer })
 
         if (!conversationId && newConversationId) {
-            console.log(1)
             setNewConversationId(newConversationId)
         }
     } catch (error) {
         resetAiAnswer()
         setChatMessage('')
     }
-}
+} 

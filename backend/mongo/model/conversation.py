@@ -38,3 +38,8 @@ class ExtractedInfo(BaseModel):
         default=None,
         description="วัตถุประสงค์หรือเป้าหมายหลักของโครงการ เช่น การเพิ่มประสิทธิภาพ ลดต้นทุน หรือการพัฒนาผลิตภัณฑ์ใหม่"
     )
+class ConversationRespond(BaseModel):
+    id: str
+    user_id: str
+    conversation_id: Optional[str] = Field(default_factory=lambda: str(uuid4()))
+    messages: List[Message]

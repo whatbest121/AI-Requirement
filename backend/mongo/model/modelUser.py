@@ -10,6 +10,13 @@ class UserLogin(BaseModel):
     username: str
     password: str
 
+class HistoryConversation(BaseModel):
+    user_id:str
+    conversation_id:str
+
+class HistoryChat(BaseModel):
+    conversation_id:str
+
 class UserResponse(BaseModel):
     id: str
     username: str

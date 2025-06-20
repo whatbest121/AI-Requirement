@@ -40,6 +40,7 @@ def extracBus(document:str):
     ).with_structured_output(ExtractedInfo, include_raw=True)
 
     res = llm.invoke(prompt)
+    print(res)
     data:ExtractedInfo = res.get("parsed")
     return data.model_dump()
 
