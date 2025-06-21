@@ -9,5 +9,5 @@ python-dotenv==1.0.0
 pydantic==2.5.0
 pydantic-settings==2.1.0
 pypdf==3.17.4
-langchain-openai==0.0.5
-langchain-core>=0.1.16,<0.2
+langchain-openai
+langchain-core
