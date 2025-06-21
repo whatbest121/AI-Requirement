@@ -1,6 +1,11 @@
 import sys
 import os
-sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+
+# Add the current directory to Python path
+current_dir = os.path.dirname(os.path.abspath(__file__))
+sys.path.insert(0, current_dir)
+print(f"Current directory: {current_dir}")
+print(f"Python path: {sys.path}")
 
 from fastapi import FastAPI, HTTPException, Depends
 from fastapi.middleware.cors import CORSMiddleware
@@ -63,11 +68,11 @@ async def protected_route(current_user: dict = Depends(get_current_active_user))
         "user_id": str(current_user["_id"]),
         "access_level": "authenticated"
     }
-#fff
-# if __name__ == "__main__":
-#     uvicorn.run(
-#         "main:app",
-#         host=settings.host,
-#         port=settings.port,
-#         reload=settings.environment == "development"
-#     )
+
+if __name__ == "__main__":
+    uvicorn.run(
+        "main:app",
+        host=settings.host,
+        port=settings.port,
+        reload=settings.environment == "development"
+    )

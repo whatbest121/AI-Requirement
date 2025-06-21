@@ -1,8 +1,6 @@
-
-
-from backend.mongo.model import conversation
-from backend.services.extrace import update_extracted_info_if_applicable
-from backend.services.langchain_module import MongoChatMessageHistory
+from mongo.model import conversation
+from services.extrace import update_extracted_info_if_applicable
+from services.langchain_module import MongoChatMessageHistory
 from mongo.database import conversation_collection
 from datetime import datetime
 

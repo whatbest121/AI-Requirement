@@ -11,10 +11,14 @@ services:
       MONGO_INITDB_DATABASE: myapp
     volumes:
       - mongo_data:/data/db
+    networks:
+      - app-network
 
   backend:
     build:
       context: ./backend
+    volumes:
+      - ./backend:/app # เพื่อ debug
     container_name: backend
     restart: always
     env_file:
@@ -24,6 +28,7 @@ services:
     depends_on:
       - mongo
     environment:
+      PYTHONPATH: /app
       MONGODB_URL: mongodb://mongo:27017
     networks:
       - app-network

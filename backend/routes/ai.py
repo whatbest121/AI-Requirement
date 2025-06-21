@@ -6,8 +6,8 @@ from fastapi.responses import StreamingResponse
 from pydantic import Field
 from pypdf import PdfReader
 from auth import get_current_active_user
-from backend.services import ai
-from backend.services.aiChat import aiStream
+from services import ai
+from services.aiChat import aiStream
 from mongo.model.modelUser import HistoryChat, HistoryConversation
 from mongo.model.conversation import Conversation, ConversationInput
 from services.ai import OpenAIStream, historyChat, historyConversation
@@ -90,6 +90,3 @@ async def historyChats(body: HistoryChat,current_user: dict = Depends(get_curren
         user_id=user_id
     )
     return await historyChat(historyConversation)
-
-
-    
