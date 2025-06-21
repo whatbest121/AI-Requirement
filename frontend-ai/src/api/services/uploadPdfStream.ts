@@ -28,7 +28,7 @@ export async function uploadPdfStream({
     setAiAnswering({ isLoading: true, content: '' })
 
     try {
-        const res = await fetchWithAuth('http://localhost:8000/api/v1/ai/upload-pdf/', {
+        const res = await fetchWithAuth('/api/v1/ai/upload-pdf/', {
             method: 'POST',
             body: formData,
         })
