@@ -8,7 +8,7 @@ import { fetchWithAuth } from "@/lib/treaty"
 async function register(payload: UserLogin) {
 	await sleep(500)
 	try {
-		const res = await fetchWithAuth('/api/v1/auth/login', {
+		const res = await fetchWithAuth('/api/v1/auth/register', {
 			method: 'POST',
 			headers: { 'Content-Type': 'application/json' },
 			body: JSON.stringify(payload),

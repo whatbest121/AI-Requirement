@@ -42,7 +42,7 @@ export function RegisterForm() {
 
     const onSubmit = (values: FormSchema) => {
 
-        mutate(values, {
+        mutate({ password: values.password, username: values.username }, {
             async onSuccess() {
                 toast({
                     title: "Success",
